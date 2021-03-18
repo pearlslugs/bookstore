@@ -1,65 +1,71 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import useBooks from '../src/lib/utils/swr/hooks/useBooks'
+import { useEffect } from 'react'
+import {
+  Flex,
+  Box,
+  Text,
+  VStack,
+  Image,
+  SimpleGrid,
+  Button,
+} from "@chakra-ui/react"
+import {cartAtom} from '../src/lib/utils/atom/declarations'
+import {useAtom} from 'jotai'
 
 export default function Home() {
+  const { books } = useBooks()
+  const [cart, setCart] = useAtom(cartAtom)
+  useEffect(() => {
+    if (books) {
+      console.log(books)
+    }
+  }, [books])
+  const handleClick = (title, price, stock) => {
+    const book = {
+      title,
+      price,
+      stock
+    }
+    setCart(cart => cart.concat(book))
+
+  }
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    <Flex w="99vw" overflowX="hidden" h="100vh" direction="column" >
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <Text fontSize="2xl" minH="10rem" as="h2">Books</Text>
+      </Box>
+      <Flex align="center" justifyContent="center">
+        <SimpleGrid columns="2" spacing="9">
+          {(books) ? 
+            books.map(book => {
+              return (
+                <Box display="flex" direction="row" minW="20rem" minH="10rem">
+                  <Box>
+                    <Image
+                        boxSize="100px"
+                        objectFit="cover"
+                        src={book.cover_img}
+                        alt={book.title}
+                      />
+                  </Box>
+                  <Box dispaly="flex" minW="8rem" direction="column">
+                    <Text>{book.title}</Text>
+                    <Text>{book.genre}</Text>
+                    <Text>{book.type}</Text>
+                    <Box display="flex" alignItems="space-between" justifyContent="space-between" direction="row">
+                      <Text>{book.price}</Text>
+                      <Text>{book.stock} left</Text>
+                    </Box>
+                    <Button onClick={() => handleClick(book.title, book.price, book.stock)}>Order</Button>
+                  </Box>
+                </Box>
+              )
+            })
+        : null}
+        </SimpleGrid>
+      </Flex>
+    </Flex>
   )
 }
